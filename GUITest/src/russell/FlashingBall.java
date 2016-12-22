@@ -55,7 +55,7 @@ public class FlashingBall extends MovingObject {
 		filledIn = true;
 	}
 	public FlashingBall(double x, double y, int left, int right, int top, int bottom, int radius) {
-		super(x, y, left + 10, right - 10, top + 10, bottom - 10);
+		super(x, y, left + radius, right - radius, top + 10, bottom - 10);
 		// numbers above must match the radius
 		this.radius = radius;
 		counter = 0;
@@ -71,7 +71,7 @@ public class FlashingBall extends MovingObject {
 		counter++;
 		if (counter == flashSpeed) {
 			counter = 0;
-			filledIn = true;
+			filledIn = !filledIn;
 		}
 	}
 
@@ -88,7 +88,7 @@ public class FlashingBall extends MovingObject {
 		g.setColor(color);
 		g.fillOval(drawX, drawY, radius * 2, radius * 2);
 		if (!filledIn) {
-			g.setColor(Color.white);
+			g.setColor(Color.WHITE);
 			g.fillOval(drawX + radius / 2, drawY + radius / 2, radius, radius);
 		}
 
@@ -101,6 +101,10 @@ public class FlashingBall extends MovingObject {
 	 */
 	public boolean isFilled(){
 		return filledIn;
+	}
+	
+	public void fillCircle(){
+		filledIn = true;
 	}
 	
 	public int getRadius(){

@@ -98,6 +98,10 @@ public abstract class MovingObject implements Runnable {
 	public void stopThread() {
 		moving = false;
 	}
+	
+	public void resumeThread() {
+		moving = true;
+	}
 
 	/**
 	 * Updates the x and y values in an infinite loop. If object hits an edge, x
@@ -108,15 +112,31 @@ public abstract class MovingObject implements Runnable {
 			animateOneStep();
 			x += xSpeed;
 			y += ySpeed;
-			if (x >= right | x <= left)
-				xSpeed *= -1;
-			if (y >= bottom | y <= top)
-				ySpeed *= -1;
+			if (x >= right){
+				if(xSpeed>0){
+					xSpeed *=-1;
+				}
+			}
+			if(x <= left){
+				if(xSpeed<0){
+					xSpeed *=-1;
+				}
+			}
+			if (y >= bottom){
+				if(ySpeed>0){
+					ySpeed *=-1;
+				}
+			}
+			if(y <= top){
+				if(ySpeed<0){
+					ySpeed *=-1;
+				}
+			}
 			try {
 				Thread.sleep(pauseDuration);
 			} catch (InterruptedException e) {
 			}
-		}
+		}	
 	}
 
 	/**
@@ -150,6 +170,19 @@ public abstract class MovingObject implements Runnable {
 	 */
 	public double getY() {
 		return y;
+	}
+	
+	public int getLeft(){
+		return left;
+	}
+	public int getRight(){
+		return right;
+	}
+	public int getTop(){
+		return top;
+	}
+	public int getBottom(){
+		return bottom;
 	}
 	
 	

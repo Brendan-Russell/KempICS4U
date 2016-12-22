@@ -31,7 +31,7 @@ public class PlayerCursor extends MovingObject{
 		}
 		case SQUARE:{
 			g.setColor(color);
-			g.fillRect((int) getX(), (int) getY(), length, length);
+			g.fillRect((int) getX() - length/2, (int) getY() - length/2, length, length);
 		}
 		}
 		
@@ -41,6 +41,14 @@ public class PlayerCursor extends MovingObject{
 	public void animateOneStep() {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public boolean outOfBounds(){
+		return getX()>=getRight()+30||getX()<=getLeft()-30||getY()<=getTop()-30||getY()>=getBottom()+30;
+	}
+	
+	public int getLength(){
+		return this.length;
 	}
 	
 

@@ -7,46 +7,53 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
- * This is the beginning of a simple game. You should expand it into a dodgeball
- * game, where the user controls an object with the mouse or keyboard, and tries
- * to avoid the balls flying around the screen. If they get hit, it's game over.
- * If they survive for 20 seconds (or some other fixed time), they go on to the
- * next level. <br>
- * <br>
- * Should be run at around 500x300 pixels.<br>
- * <br>
- * @version Nov. 2015
- * 
- * @author Christina Kemp adapted from Sam Scott
+ * Dodgeball style program
+ * Use arrow keys to move the blue square and avoid the flashing balls
+ * @author Brendan Russell
+ * @version Dec 22, 2016
  */
 @SuppressWarnings("serial")
 public class Dodgeball extends JPanel implements Runnable, KeyListener {
 
 	private boolean gameOver = false;
 	
-	int width = 2000;
-	int height = 970;
+	long startTime = 0;
 	
+	int level = 0;
+	
+	/**
+	 * Width and height of the screen
+	 */
+	int width = 1900;
+	int height = 970;
+	/**
+	 * The integer value of the current key that is pressed
+	 */
 	int key = 0;
 	/**
 	 * The number of balls on the screen.
 	 */
-	final int numBalls = 10;
+	int numBalls = 14;
 	/**
 	 * The pause between repainting (should be set for about 30 frames per
 	 * second).
 	 */
-	final int pauseDuration = 50;
+	final int pauseDuration = 0;
 	/**
 	 * An array of balls.
 	 */
-	FlashingBall[] ball = new FlashingBall[numBalls];
-	
+	ArrayList<FlashingBall> ball = new ArrayList<FlashingBall>();
+	Calendar cal;
+	/**
+	 * Cursor for the player to use
+	 */
 	PlayerCursor cursor = new PlayerCursor(50, 50, 0, width, 0, height, Shape.SQUARE , 10);
 
 	/** main program (entry point) */
@@ -69,20 +76,23 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 		// Start the ball bouncing (in its own thread)
 		this.setPreferredSize(new Dimension(width, height));
 		this.setBackground(Color.WHITE);
-		
 		cursor.setXSpeed(0);
 		cursor.setYSpeed(0);
-		cursor.setColor(new Color(0,0,255));
+		cursor.setColor(new Color(0,0,0));
 		
+		for (int i = 0; i < numBalls; i++){
+			ball.add(new FlashingBall((int) (Math.random()*1100+500), (int) (Math.random()*700+100), 0, width, 0, height, 100));
+		}
 		for (int i = 0; i < numBalls; i++) {
-			ball[i] = new FlashingBall(1700, 50, 0, width, 0, height, 100);
-			ball[i].setXSpeed(Math.random() * 12-6);
-			ball[i].setYSpeed(Math.random() * 12-6);
-			ball[i].setColor(new Color((int) (Math.random() * 256), 
+			ball.get(i).setXSpeed(Math.random() * 12-6);
+			ball.get(i).setYSpeed(Math.random() * 12-6);
+			ball.get(i).setColor(new Color((int) (Math.random() * 256), 
 					(int) (Math.random() * 256), (int) (Math.random() * 256)));
 		}
 		
 		addKeyListener(this);
+		
+		startTime = System.currentTimeMillis();
 		
 		Thread gameThread = new Thread(this);
 		gameThread.start();
@@ -113,43 +123,78 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 					cursor.setYSpeed(0);
 				}
 				for(int i=0; i<numBalls; i++){
-					if(didCursorCollide(cursor, ball[i])){
+					if(didCursorCollide(cursor, ball.get(i))){
 						gameOver();
 					}
 				}
-				repaint();
-				try {
-					Thread.sleep(pauseDuration);
-				} catch (InterruptedException e) {
+				if(cursor.outOfBounds()){
+					gameOver();
 				}
+				if(System.currentTimeMillis() - startTime > 20*1000){//20 seconds * 1000 milliseconds per second
+					startTime = System.currentTimeMillis();
+					nextLevel();
+				}
+				repaint();
 			}
 			else{
 				if(key==82){
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+					}
 					resetGame();
-					gameOver = false;
 				}
+			}
+			if(key==67){
+				System.exit(0);
+			}
+			try {
+				Thread.sleep(pauseDuration);
+			} catch (InterruptedException e) {
 			}
 		}
 	}
-	private void resetGame() {
-		for (int i = 0; i < numBalls; i++) {
-			ball[i] = new FlashingBall(1700, 50, 0, width, 0, height, 100);
-			ball[i].setXSpeed(Math.random() * 12-6);
-			ball[i].setYSpeed(Math.random() * 12-6);
-			ball[i].setColor(new Color((int) (Math.random() * 256), 
-					(int) (Math.random() * 256), (int) (Math.random() * 256)));
-			ball[i].startThread();
+	
+	private void nextLevel() {
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
 		}
+		numBalls++;
+		level++;
+		ball.add(new FlashingBall((int) (Math.random()*1100+500), (int) (Math.random()*700+100), 0, width, 0, height, 100));
+		ball.get(ball.size()-1).setXSpeed(Math.random() * 12-6);
+		ball.get(ball.size()-1).setYSpeed(Math.random() * 12-6);
+		ball.get(ball.size()-1).setColor(new Color((int) (Math.random() * 256), 
+				(int) (Math.random() * 256), (int) (Math.random() * 256)));
 	}
 
-	//4162369195 Dietrich Home Phone Number
+	/**
+	 * Resets the game to the beginning
+	 */
+	private void resetGame() {
+		gameOver = false;
+		this.setBackground(Color.WHITE);
+		cursor.move(50, 50);
+		for (int i = 0; i < numBalls; i++) {
+			ball.get(i).move(Math.random()*1100+500, Math.random()*700+100);
+			ball.get(i).setXSpeed(Math.random() * 12-6);
+			ball.get(i).setYSpeed(Math.random() * 12-6);
+			ball.get(i).setColor(new Color((int) (Math.random() * 256), 
+					(int) (Math.random() * 256), (int) (Math.random() * 256)));
+			ball.get(i).startThread();
+		}
+		key = 0;
+		cursor.startThread();
+	}
+
 	/**
 	 * Clears the screen and paints the balls.
 	 */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		for (int i = 0; i < numBalls; i++) {
-			ball[i].draw(g);
+			ball.get(i).draw(g);
 		}
 		cursor.draw(g);
 
@@ -157,7 +202,7 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 	
 	
 	public boolean didCursorCollide(PlayerCursor cursor, FlashingBall ball){
-		int radius = ball.getRadius();
+		int radius = ball.getRadius() + (cursor.getLength()/2);
 		double xTotal = cursor.getX() - ball.getX();
 		double yTotal = cursor.getY() - ball.getY();
 		double dist = Math.sqrt(Math.pow(xTotal, 2) + Math.pow(yTotal, 2));
@@ -166,11 +211,13 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 	
 	public void gameOver(){
 		gameOver = true;
-		cursor.move(10, 10);
+		cursor.move(-10, -10);
+		this.setBackground(Color.BLACK);
 		Color redColour = new Color(255, 0, 0);
 		for(int i=0; i<numBalls; i++){
-			ball[i].stopThread();
-			ball[i].setColor(redColour);
+			ball.get(i).stopThread();
+			ball.get(i).setColor(redColour);
+			ball.get(i).fillCircle();
 		}
 		cursor.stopThread();
 	}
