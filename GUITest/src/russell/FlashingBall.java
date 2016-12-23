@@ -54,6 +54,24 @@ public class FlashingBall extends MovingObject {
 		flashSpeed = (int) (Math.random() * 5 + 5);
 		filledIn = true;
 	}
+	/**
+	 * Calls the superclass constructor, plus sets radius, and flash parameters.
+	 * 
+	 * @param x
+	 *            The x location.
+	 * @param y
+	 *            The y location.
+	 * @param left
+	 *            The left edge.
+	 * @param right
+	 *            The right edge.
+	 * @param top
+	 *            The top edge.
+	 * @param bottom
+	 *            The bottom edge.
+	 * @param radius
+	 * 			  The radius.
+	 */
 	public FlashingBall(double x, double y, int left, int right, int top, int bottom, int radius) {
 		super(x, y, left + radius, right - radius, top + 10, bottom - 10);
 		// numbers above must match the radius
@@ -103,10 +121,18 @@ public class FlashingBall extends MovingObject {
 		return filledIn;
 	}
 	
+	/**
+	 * Fills the circle.
+	 */
 	public void fillCircle(){
 		filledIn = true;
 	}
 	
+	/**
+	 * Gives the radius of the ball.
+	 * 
+	 * @return the radius of the ball.
+	 */
 	public int getRadius(){
 		return this.radius;
 	}

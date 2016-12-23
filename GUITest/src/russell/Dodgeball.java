@@ -22,19 +22,29 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class Dodgeball extends JPanel implements Runnable, KeyListener {
 
+	/**
+	 * Current state of the game.
+	 */
 	private boolean gameOver = false;
 	
-	long startTime = 0;
+	/**
+	 * The start time of the current level in milliseconds.
+	 */
+	long levelStartTime = 0;
 	
+	/**
+	 * The current level.
+	 */
 	int level = 0;
 	
 	/**
-	 * Width and height of the screen
+	 * Width and height of the screen.
 	 */
 	int width = 1900;
 	int height = 970;
+	
 	/**
-	 * The integer value of the current key that is pressed
+	 * The integer value of the current key that is pressed.
 	 */
 	int key = 0;
 	/**
@@ -45,14 +55,14 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 	 * The pause between repainting (should be set for about 30 frames per
 	 * second).
 	 */
-	final int pauseDuration = 0;
+	final int pauseDuration = 30;
 	/**
-	 * An array of balls.
+	 * An ArrayList of balls.
 	 */
 	ArrayList<FlashingBall> ball = new ArrayList<FlashingBall>();
 	Calendar cal;
 	/**
-	 * Cursor for the player to use
+	 * Cursor for the player to use.
 	 */
 	PlayerCursor cursor = new PlayerCursor(50, 50, 0, width, 0, height, Shape.SQUARE , 10);
 
@@ -92,7 +102,7 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 		
 		addKeyListener(this);
 		
-		startTime = System.currentTimeMillis();
+		levelStartTime = System.currentTimeMillis();
 		
 		Thread gameThread = new Thread(this);
 		gameThread.start();
@@ -130,11 +140,10 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 				if(cursor.outOfBounds()){
 					gameOver();
 				}
-				if(System.currentTimeMillis() - startTime > 20*1000){//20 seconds * 1000 milliseconds per second
-					startTime = System.currentTimeMillis();
+				if(System.currentTimeMillis() - levelStartTime > 20*1000){//20 seconds * 1000 milliseconds per second
+					levelStartTime = System.currentTimeMillis();
 					nextLevel();
 				}
-				repaint();
 			}
 			else{
 				if(key==82){
@@ -148,6 +157,7 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 			if(key==67){
 				System.exit(0);
 			}
+			repaint();
 			try {
 				Thread.sleep(pauseDuration);
 			} catch (InterruptedException e) {
@@ -155,22 +165,40 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 		}
 	}
 	
+	/**
+	 * Progresses the game to the next level by addding a new FlashingBall.
+	 */
 	private void nextLevel() {
-		try {
-			Thread.sleep(10);
-		} catch (InterruptedException e) {
-		}
 		numBalls++;
 		level++;
-		ball.add(new FlashingBall((int) (Math.random()*1100+500), (int) (Math.random()*700+100), 0, width, 0, height, 100));
-		ball.get(ball.size()-1).setXSpeed(Math.random() * 12-6);
-		ball.get(ball.size()-1).setYSpeed(Math.random() * 12-6);
-		ball.get(ball.size()-1).setColor(new Color((int) (Math.random() * 256), 
-				(int) (Math.random() * 256), (int) (Math.random() * 256)));
+		do{
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+			}
+			ball.add(new FlashingBall((int) (Math.random()*1100+500), (int) (Math.random()*700+100), 0, width, 0, height, 100));
+			ball.get(ball.size()-1).setXSpeed(Math.random() * 12-6);
+			ball.get(ball.size()-1).setYSpeed(Math.random() * 12-6);
+			ball.get(ball.size()-1).setColor(new Color((int) (Math.random() * 256), 
+					(int) (Math.random() * 256), (int) (Math.random() * 256)));
+		}while(didNewBallCollide());
+	}
+	
+	/**
+	 * Checks if the newly created ball spawned on top of the cursor and deletes it if it has.
+	 * 
+	 * @return True if the new ball spawned on top of the cursor, false otherwise.
+	 */
+	private boolean didNewBallCollide(){
+		if(didCursorCollide(cursor, ball.get(ball.size()-1))){
+			ball.remove(ball.size()-1);
+			return true;
+		}
+		return false;
 	}
 
 	/**
-	 * Resets the game to the beginning
+	 * Resets the game to the beginning.
 	 */
 	private void resetGame() {
 		gameOver = false;
@@ -200,7 +228,16 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 
 	}
 	
-	
+	/**
+	 * Finds if the player cursor is inside one of the FlashingBalls.
+	 * 
+	 * @param cursor
+	 * 			The cursor being used by the player.
+	 * @param ball
+	 * 			The FlashingBall to check
+	 * @return
+	 * 			True if the cursor is inside the FlashingBall
+	 */
 	public boolean didCursorCollide(PlayerCursor cursor, FlashingBall ball){
 		int radius = ball.getRadius() + (cursor.getLength()/2);
 		double xTotal = cursor.getX() - ball.getX();
@@ -209,6 +246,9 @@ public class Dodgeball extends JPanel implements Runnable, KeyListener {
 		return radius>=dist;
 	}
 	
+	/**
+	 * Stops all the balls and turns their colour red.
+	 */
 	public void gameOver(){
 		gameOver = true;
 		cursor.move(-10, -10);

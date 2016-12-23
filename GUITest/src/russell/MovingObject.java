@@ -98,10 +98,6 @@ public abstract class MovingObject implements Runnable {
 	public void stopThread() {
 		moving = false;
 	}
-	
-	public void resumeThread() {
-		moving = true;
-	}
 
 	/**
 	 * Updates the x and y values in an infinite loop. If object hits an edge, x
@@ -172,15 +168,39 @@ public abstract class MovingObject implements Runnable {
 		return y;
 	}
 	
+	/**
+	 * Returns the left boundary.
+	 * 
+	 * @return
+	 * 			  the left boundary.
+	 */
 	public int getLeft(){
 		return left;
 	}
+	/**
+	 * Returns the right boundary.
+	 * 
+	 * @return
+	 * 			  the right boundary.
+	 */
 	public int getRight(){
 		return right;
 	}
+	/**
+	 * Returns the top boundary.
+	 * 
+	 * @return
+	 * 			  the top boundary.
+	 */
 	public int getTop(){
 		return top;
 	}
+	/**
+	 * Returns the bottom boundary.
+	 * 
+	 * @return
+	 * 			  the bottom boundary.
+	 */
 	public int getBottom(){
 		return bottom;
 	}
@@ -237,7 +257,14 @@ public abstract class MovingObject implements Runnable {
 		this.color = color;
 	}
 	
-	
+	/**
+	 * Moves the object to a specific x and y coordinate
+	 * 
+	 * @param x
+	 * 			The x coordinate.
+	 * @param y
+	 * 			The y coordinate.
+	 */
 	public void move(double x, double y){
 		this.x = x;
 		this.y = y;
